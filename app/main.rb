@@ -1,14 +1,28 @@
+require 'app/tile.rb'
+require 'app/map.rb'
+
 def tick(args)
   args.state.sprite_size ||= 16
   args.state.tile_size ||= 72
   args.state.num_tiles ||= 9
   args.state.ui_width ||= 4
 
-  args.state.player.x ||= 0
-  args.state.player.y ||= 0
+  args.state.tiles = generate_level(args) if args.state.tiles.nil?
+  args.state.starting_tile ||= random_passable_tile(args)
+  args.state.player.x ||= args.state.starting_tile.x
+  args.state.player.y ||= args.state.starting_tile.y
 
   player_input(args)
+  draw(args)
+end
+
+def draw(args)
   args.outputs.solids << [0, 0, 1280, 720, 255, 255, 255]
+  args.state.tiles.each do |column|
+    column.each do |tile|
+      args.outputs.sprites << tile.draw_args(args)
+    end
+  end
   args.outputs.sprites << player_draw(args)
 end
 
